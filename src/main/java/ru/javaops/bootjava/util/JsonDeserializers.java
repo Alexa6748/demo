@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.experimental.UtilityClass;
-import ru.javaops.bootjava.config.WebSecurityConfig;
 
 import java.io.IOException;
 

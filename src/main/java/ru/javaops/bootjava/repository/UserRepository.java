@@ -1,21 +1,27 @@
 package ru.javaops.bootjava.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.transaction.annotation.Transactional;
+import ru.javaops.bootjava.error.NotFoundException;
 import ru.javaops.bootjava.model.User;
 
-import java.util.List;
 import java.util.Optional;
 
-@Transactional(readOnly = true)
-public interface UserRepository extends JpaRepository<User, Integer> {
+import static ru.javaops.bootjava.config.SecurityConfig.PASSWORD_ENCODER;
 
-    @RestResource(rel = "by-email", path = "by-email")
+@Transactional(readOnly = true)
+public interface UserRepository extends BaseRepository<User> {
     @Query("SELECT u FROM User u WHERE u.email = LOWER(:email)")
     Optional<User> findByEmailIgnoreCase(String email);
 
-    @RestResource(rel = "by-lastname", path = "by-lastname")
-    List<User> findByLastNameContainingIgnoreCase(String lastName);
+    @Transactional
+    default User prepareAndSave(User user) {
+        user.setPassword(PASSWORD_ENCODER.encode(user.getPassword()));
+        user.setEmail(user.getEmail().toLowerCase());
+        return save(user);
+    }
+
+    default User getExistedByEmail(String email) {
+        return findByEmailIgnoreCase(email).orElseThrow(() -> new NotFoundException("User with email=" + email + " not found"));
+    }
 }
